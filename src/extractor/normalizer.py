@@ -77,13 +77,15 @@ class NormalizerAgent(Agent):
                         "  * via" \
                         "  * plazas_convocadas" \
                         "  * plazas_libres" \
-                        "  * otras_plazas" \
+                        "  * otras_plazas: aquí, devuelve la suma de todas las plazas que no sean plazas libres o convocadas" \
                         "  * fecha_de_publicacion" \
                         "  * fecha_de_cierre" \
                         "  * referencia" \
                         "-Si alguno de estos campos no aparece en el texto, devuelve 'no aplica' para ese campo." \
                         "-Devuelve todo en minúscula." \
+                        "-Devuelve todo como string"\
                         "-Devuelve los campos marcados como fecha con este formato: 2025-06-05" \
+                        "-Limpia texto mal formateado. Hazlo con todos los casos en los que tenga más sentido si hay que eliminar algún espacio. Por ejemplo, si aparece la palabra 'auxilia r' o 'no investigado r', conviértelo en 'auxiliar' y 'no investigador'"  \
                         ""
 
         response = self.open_ai_client.chat.completions.create(model="gpt-4.1-nano",
@@ -115,8 +117,6 @@ class NormalizerAgent(Agent):
                     'otras_plazas', 'fecha_de_publicacion',
                     'fecha_de_cierre', 'referencia']
         df[campos] = df["texto_original"].apply(lambda x: pd.Series(self.call_llm(x)))
-        df["fecha_de_cierre"] = pd.to_datetime(df["fecha_de_cierre"]).dt.strftime("%Y-%m-%d")
-        df["fecha_de_publicacion"] = pd.to_datetime(df["fecha_de_publicacion"]).dt.strftime("%Y-%m-%d")
         return df
 
     def save_in_sql(self, df):
@@ -134,7 +134,8 @@ class NormalizerAgent(Agent):
             diccionario = self.get_text_block(text)
             df = self.get_information_llm(diccionario)
             result = pd.concat([result, df])
-        self.save_in_sql(result)
+        print(df)
+        #self.save_in_sql(result)
 
 
 

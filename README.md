@@ -1,61 +1,101 @@
 # OpositIA
 
-OpositIA es un sistema modular e inteligente para la recolección, análisis y publicación diaria de convocatorias de oposiciones en España. Combina scraping, procesamiento de lenguaje natural (NLP) y generación de informes visuales. Diseñado con LangGraph y GPT-4o, ofrece un flujo flexible y eficiente para mantenerte siempre actualizado.
+**OpositIA** es un sistema modular e inteligente para la **recolección, análisis y publicación diaria** de convocatorias de oposiciones en España. Automatiza todo el flujo, desde el scraping hasta la consulta en lenguaje natural, utilizando tecnologías avanzadas como **LangGraph** y **GPT-4o**.
 
 ---
 
-## ¿Qué hace OpositIA?
+## Estructura del proyecto
 
-- Recolecta y descarga boletines oficiales de oposiciones (solo Gobierno de España, sin comunidades autónomas, por ahora).  
-- Extrae y estructura los datos clave: plazas, fechas límite, requisitos y perfiles ideales.  
-- Clasifica los perfiles más adecuados para cada convocatoria usando heurísticas y modelos de IA.  
-- Genera un informe diario con todas las novedades.  
-- Publica automáticamente en Instagram bajo el perfil OpositIA.
-
----
-
-## Arquitectura general
-
-- **ScraperAgent:** Descarga boletines (PDF/HTML) de fuentes oficiales.  
-- **ExtractorAgent:** Limpia y convierte el contenido a texto estructurado.  
-- **NormalizerAgent:** Homogeneiza fechas y campos clave.  
-- **ProfileMatcherAgent:** Identifica perfiles recomendados (usando GPT-4o cuando es necesario).  
-- **ReportGeneratorAgent:** Crea el informe diario en formato visual (Markdown, HTML o imagen).  
-- **InstagramPosterAgent:** Publica el resumen en Instagram vía Meta Graph API.  
-- **Orquestación:** LangGraph coordina todo el flujo con bifurcaciones dinámicas (OCR, errores, etc.).
+```text
+src/
+├── Agent/                     # Clase padre de agente
+├── database_consultant/       # Consultas sobre la base de datos con llama-index y llms
+├── extractor/                 # Extracción y normalización de información
+├── reasoner/                  # Razonamiento para reformular la pregunta del usuario
+├── scraper/                   # Scraping de portales oficiales
+├── telegram_connector/        # Interacción a través de Telegram
+├── utils/                     # Utilidades auxiliares
+└── langgraph_flow.py          # Flujo principal definido con LangGraph
+```
 
 ---
 
-## Tecnologías clave
+##  Características destacadas
 
-- **Python:** Lenguaje principal.  
-- **LangGraph:** Orquestación modular de agentes.  
-- **Pandas, BeautifulSoup, pdfplumber, pytesseract:** Extracción y procesamiento de datos.  
-- **OpenAI GPT-4o API:** Clasificación semántica de perfiles (opcional, según complejidad del texto).  
-- **Pillow / Canva API:** Creación de imágenes para Instagram.  
-- **Meta Graph API:** Publicación automática en Instagram.
+-  Scraping automatizado de fuentes oficiales.
+-  Procesamiento de lenguaje natural para normalizar y estructurar datos.
+-  Agentes especializados en un flujo orquestado por LangGraph.
+-  Consultas conversacionales sobre la base de datos.
+-  Integración con Telegram para interacción directa.
 
 ---
 
-## Instalación y uso
+## 🛠️ Instalación
 
-Proyecto en fase de desarrollo y aprendizaje, no apto todavía para producción.
+1. Clona el repositorio:
 
 ```bash
-# 1️⃣ Clona el repositorio
-git clone https://github.com/tu-usuario/OpositIA.git
-cd OpositIA
+git clone https://github.com/tuusuario/opositia.git
+cd opositia
+```
 
-# 2️⃣ Crea entorno virtual
+2. Crea un entorno virtual y actívalo:
+
+```bash
 python -m venv .venv
-source .venv/bin/activate
+source .venv/bin/activate  # En Windows: .venv\Scripts\activate
+```
 
-# 3️⃣ Instala dependencias principales
+3. Instala las dependencias:
+
+```bash
 pip install -r requirements.txt
+```
 
-# 4️⃣ Configura variables de entorno (API keys, rutas de scraping)
-cp .env.example .env
-# Edita .env con tus credenciales de OpenAI e Instagram (Meta Graph API)
+---
 
-# 5️⃣ Ejecuta el flujo principal (ejemplo)
-python main.py
+## Ejecución
+
+Lanza el flujo principal:
+
+```bash
+python src/langgraph_flow.py
+```
+*IMPORTANTE: no se podrá ejecutar correctamente a no ser que esté configurado el fichero .env en la raíz del proyecto*
+---
+
+##  Interfaz por Telegram
+
+- Para interactuar con el Opositia_bot es necesario configurar el fichero .env con TELEGRAM_BOT_TOKEN y TELEGRAM_CHAT_ID.
+- TELEGRAM_BOT_TOKEN es única y privada, y será facilitada en la demo del proyecto
+- TELEGRAM_CHAT_ID es el ID de una conversación de cualquier usuario con opositia_bot, y puede ser obtenida buscando *opositia* en el buscador de Telegram, iniciando una conversación con él, y luego obteniendo el chat_id
+
+---
+
+##  OpenAI
+
+- Para poder ejecutar el paquete, es necesario tener un token para conectarse con OpenAI e incluirlo en un fichero .env con el nombre OPENAI_API_KEY
+
+---
+
+##  Agentes principales
+
+| Módulo                   | Descripción                                               |
+|--------------------------|-----------------------------------------------------------|
+| `scraper_agent.py`       | Obtiene convocatorias desde sitios web oficiales.         |
+| `extractor_agent.py`     | Extrae y estructura información relevante.                |
+| `normalizer.py`          | Homogeneiza datos usando LLMs.                            |
+| `reasoner.py`            | Aplica lógica para mejorar la consulta del usuario.       |
+| `database_consultant.py` | Responde preguntas sobre la base de datos utilizando LLMs |
+| `telegram_connector/`    | Gestiona la comunicación mediante Telegram.               |
+
+---
+
+##  Casos de uso
+
+- Seguimiento actualizado de convocatorias de empleo público.
+- Automatización de informes y alertas personalizadas.
+- Consulta avanzada por fecha, categoría, ubicación o institución.
+
+---
+

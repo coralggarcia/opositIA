@@ -124,18 +124,22 @@ class NormalizerAgent(Agent):
         df.to_sql("oposiciones", conn, if_exists="append", index=False)
         conn.close()
 
-    def normalize_and_save(self):
-        files_to_process = self.get_files_to_process()
-        result = pd.DataFrame({})
-        for file in files_to_process:
-            logger.info(f"Leyendo el contenido del texto {file}")
-            with open(file, 'r', encoding='utf-8') as f:
-                text = f.read()
-            diccionario = self.get_text_block(text)
-            df = self.get_information_llm(diccionario)
-            result = pd.concat([result, df])
-        print(df)
-        #self.save_in_sql(result)
+    def invoke(self, input):
+        if input.get("respuesta").startswith("Sin ficheros"):
+            return input
+        else:
+            files_to_process = self.get_files_to_process()
+            result = pd.DataFrame({})
+            for file in files_to_process:
+                logger.info(f"Leyendo el contenido del texto {file}")
+                with open(file, 'r', encoding='utf-8') as f:
+                    text = f.read()
+                diccionario = self.get_text_block(text)
+                df = self.get_information_llm(diccionario)
+                result = pd.concat([result, df])
+            self.save_in_sql(result)
+            input["respuesta"]=f"Se ha almacenado con éxito el nuevo boletín, correspondiente a los ficheros: {files_to_process}"
+            return input
 
 
 

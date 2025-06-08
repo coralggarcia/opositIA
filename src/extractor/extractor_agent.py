@@ -33,10 +33,13 @@ class ExtractorAgent(Agent):
         return {new_file+'.pdf': os.path.join(self.raw_dir, "boletines", new_file+'.pdf')
                 for new_file
                 in set([file.split('.')[0] for file in input_files])
-                .difference(set([file.split('.')[0] for file in output_files]))}
+                .difference(set([file.split('.')[0] for file in output_files]))}, output_files
 
-    def extract(self):
-        files_to_process = self.get_files_to_process()
+    def invoke(self, input):
+        files_to_process, available_files = self.get_files_to_process()
+        if files_to_process == {}:
+            input["respuesta"] = f"Sin ficheros nuevos que actualizar. Los datos disponibles son: {available_files}"
+            return input
         output_files = []
         for file_name, file_path in files_to_process.items():
             logger.info(f"Leyendo el contenido del pdf {file_name}")
@@ -53,4 +56,6 @@ class ExtractorAgent(Agent):
             logger.info(f'Almacenando texto en {os.path.join(self.processed_dir, "boletines", file_name)}')
         with open(os.path.join(self.log_dir, "execution_log.txt"), 'w', encoding='utf-8') as f:
             f.write("\n".join(output_files))
+        input["respuesta"]= ""
+        return input
 

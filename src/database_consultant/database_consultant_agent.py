@@ -8,7 +8,7 @@ from loguru import logger
 from src.Agent.Agent import Agent
 
 
-class NormalizerAgent(Agent):
+class DatabaseConsultantAgent(Agent):
     """
     Clase convertir el texto en una base de datos que pueda ser consultada. Hereda de Agent.
     """
@@ -18,7 +18,7 @@ class NormalizerAgent(Agent):
         """
         super().__init__()
         self.outputs_dir = self.parent_dir / "data" / "outputs"
-        self.custom_prompt = """You are an expert SQL assistant for a **SQLite database que contiene información oficial sobre oposiciones públicas**.
+        self.prompt_text = """You are an expert SQL assistant for a **SQLite database que contiene información oficial sobre oposiciones públicas**.
 
                                 The database has one main table called `oposiciones` with exactly these columns (use them verbatim, case-sensitive):
                                 
@@ -58,7 +58,6 @@ class NormalizerAgent(Agent):
                                 SQLResult: <resultado de la consulta>
                                 Answer: <respuesta final explicativa>
                                 6. **Use only columns listed**. Qualify names if needed. Dialect is SQLite (fechas en formato 'YYYY-MM-DD').
-                                7. **Return Referenica** Always include the referencia column in the SELECT clause, regardless of the user's question. This field uniquely identifies each row and must always be returned in the results.
                                 
                                 Use only the following schema:
                                 
@@ -83,32 +82,26 @@ class NormalizerAgent(Agent):
         return sql_database
 
     def get_llm(self):
-        llm = OpenAI(model="gpt-4.1-nano", temperature=0.1,
+        llm = OpenAI(model="o4-mini", temperature=0.1,
                      api_key=os.getenv("OPENAI_API_KEY"))
         return llm
 
     def get_custom_prompt(self):
-        custom_prompt = PromptTemplate(self.custom_prompt)
+        custom_prompt = self.custom_prompt
         return custom_prompt
+
     def get_sql_query_engine(self, sql_database, llm, custom_prompt):
         query_engine = NLSQLTableQueryEngine(
             sql_database=sql_database,
             llm=llm,
             text_to_sql_prompt=custom_prompt,
-            synthesize_response=True
+            synthesize_response=True,
+            verbose=True
         )
         return query_engine
 
-    def invoke(self, input: dict) -> dict:
-        """
-        Método compatible con LangGraph Tools.
-        Espera un diccionario con la clave 'query', que contiene la pregunta del usuario.
-        """
+    def invoke(self, input):
         pregunta = input.get("query", "").strip()
-
-        if not pregunta:
-            return {"error": "No se proporcionó ninguna consulta."}
-
         logger.info(f"Procesando consulta del usuario: {pregunta}")
         respuesta = self.query_engine.query(pregunta)
 

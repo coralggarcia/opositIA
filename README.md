@@ -30,7 +30,7 @@ src/
 
 ---
 
-## 🛠️ Instalación
+##  Instalación
 
 1. Clona el repositorio:
 
